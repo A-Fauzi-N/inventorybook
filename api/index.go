@@ -18,30 +18,32 @@ var (
 )
 
 func findTemplates() string {
+	wd, _ := os.Getwd()
+	fmt.Printf("[DEBUG] working dir: %s\n", wd)
+	
+	// Rekursif cari semua file
+	filepath.Walk("/var/task", func(path string, info os.FileInfo, err error) error {
+		if err == nil {
+			fmt.Printf("[DEBUG] file: %s\n", path)
+		}
+		return nil
+	})
+
 	candidates := []string{
-		"/vercel/path0/templates/*",
+		"/var/task/templates/*",
 		"templates/*",
 		"../templates/*",
-		"/var/task/templates/*",
+		"/vercel/path0/templates/*",
 	}
 
 	for _, path := range candidates {
-		matches, err := filepath.Glob(path)
-		fmt.Printf("[DEBUG] trying path: %s -> matches: %v, err: %v\n", path, matches, err)
-		if err == nil && len(matches) > 0 {
+		matches, _ := filepath.Glob(path)
+		if len(matches) > 0 {
 			return path
 		}
 	}
 
-	// Log isi direktori untuk debug
-	wd, _ := os.Getwd()
-	fmt.Printf("[DEBUG] working dir: %s\n", wd)
-	entries, _ := os.ReadDir(wd)
-	for _, e := range entries {
-		fmt.Printf("[DEBUG] found in wd: %s\n", e.Name())
-	}
-
-	return "templates/*" // fallback
+	return "templates/*"
 }
 
 func init() {
