@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//go:embed templates/*
 var templatesFS embed.FS
 
 var app *gin.Engine
@@ -23,7 +24,6 @@ func init() {
 	app = gin.New()
 	app.Use(gin.Logger(), gin.Recovery())
 
-	// Load templates dari embed
 	tmpl := template.Must(template.ParseFS(templatesFS, "templates/*.html"))
 	app.SetHTMLTemplate(tmpl)
 
