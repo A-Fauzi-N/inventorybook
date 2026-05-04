@@ -11,7 +11,7 @@ import (
 	_ "database/sql"
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 func addNeonEndpoint(connStr string) string {
@@ -26,7 +26,6 @@ func addNeonEndpoint(connStr string) string {
 		return connStr
 	}
 
-	// Ambil endpoint ID, buang suffix "-pooler" kalau ada
 	endpointID := strings.TrimSuffix(parts[0], "-pooler")
 
 	q := u.Query()
@@ -44,7 +43,8 @@ func InitDB() *gorm.DB {
 	conn := os.Getenv("POSTGRES_URL")
 	conn = addNeonEndpoint(conn)
 
-	db, err := gorm.Open("postgres", conn)
+	// Ganti "postgres" -> "pgx"
+	db, err := gorm.Open("pgx", conn)
 	if err != nil {
 		log.Fatal(err)
 	}
