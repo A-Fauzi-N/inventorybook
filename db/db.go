@@ -1,7 +1,6 @@
 package db
 
 import (
-	"inventorybook/models"
 	"fmt"
 	"log"
 	"net/url"
@@ -52,33 +51,28 @@ func InitDB() *gorm.DB {
 }
 
 func Migrate(db *gorm.DB) {
-	db.AutoMigrate(&models.Books{})
+	// Buat table manual pakai raw SQL agar tidak pakai AUTO_INCREMENT
+	db.Exec(`
+		CREATE TABLE IF NOT EXISTS books (
+			id SERIAL PRIMARY KEY,
+			title TEXT NOT NULL,
+			author TEXT NOT NULL,
+			description TEXT NOT NULL,
+			stock INTEGER NOT NULL
+		)
+	`)
 
-	data := models.Books{}
-	if db.Find(&data).RecordNotFound() {
+	var count int
+	db.Raw("SELECT COUNT(*) FROM books").Scan(&count)
+	if count == 0 {
 		seederBook(db)
 	}
 }
 
 func seederBook(db *gorm.DB) {
-	data := []models.Books{{
-		Title:       "Jojo Bizzare Adventure part 1",
-		Author:      "Hirohiko Araki",
-		Description: "JOJO!!!!!",
-		Stock:       5,
-	}, {
-		Title:       "Jojo Bizzare Adventure part 2",
-		Author:      "Hirohiko Araki",
-		Description: "JOJO!!!!!",
-		Stock:       5,
-	}, {
-		Title:       "Jojo Bizzare Adventure part 3",
-		Author:      "Hirohiko Araki",
-		Description: "JOJO!!!!!",
-		Stock:       5,
-	}}
-
-	for _, v := range data {
-		db.Create(&v)
-	}
+	db.Exec(`INSERT INTO books (title, author, description, stock) VALUES
+		('Jojo Bizzare Adventure part 1', 'Hirohiko Araki', 'JOJO!!!!!', 5),
+		('Jojo Bizzare Adventure part 2', 'Hirohiko Araki', 'JOJO!!!!!', 5),
+		('Jojo Bizzare Adventure part 3', 'Hirohiko Araki', 'JOJO!!!!!', 5)
+	`)
 }

@@ -1,7 +1,7 @@
 package models
 
 type Books struct {
-	ID          int    `json:"id" form:"id" gorm:"primary_key"`
+	ID          int    `json:"id" form:"id"`
 	Title       string `json:"title" form:"title" binding:"required"`
 	Author      string `json:"author" form:"author" binding:"required"`
 	Description string `json:"description" form:"description" binding:"required"`

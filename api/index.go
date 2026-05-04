@@ -2,9 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"os"
-	"path/filepath"
-	"runtime"
 	apps "inventorybook/app"
 	"inventorybook/auth"
 	"inventorybook/db"
@@ -24,15 +21,8 @@ func init() {
 	app = gin.New()
 	app.Use(gin.Logger(), gin.Recovery())
 
-	_, filename, _, _ := runtime.Caller(0)
-	basePath := filepath.Dir(filepath.Dir(filename))
-	templatesPath := filepath.Join(basePath, "templates", "*")
-
-	if _, err := os.Stat(filepath.Join(basePath, "templates")); os.IsNotExist(err) {
-		templatesPath = "templates/*"
-	}
-
-	app.LoadHTMLGlob(templatesPath)
+	// Path template di Vercel selalu di /vercel/path0/templates/
+	app.LoadHTMLGlob("/vercel/path0/templates/*")
 
 	h := apps.New(conn)
 
