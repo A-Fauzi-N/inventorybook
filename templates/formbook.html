@@ -1,0 +1,55 @@
+{{ template "header.html" . }}
+
+<section class="section">
+    {{ if .payload }}
+    <form action="/updateBook/{{ .payload.ID }}" method="post">
+    {{ else }}
+    <form action="/book" method="post">
+    {{ end }}
+
+        <!-- auth hidden biar token/login tetap kebawa -->
+        <input type="hidden" name="auth" value="{{ .auth }}">
+
+        <div class="container" style="border: 1px solid lightgray; border-radius: 3px; padding: 15px;">
+
+            <div class="field">
+                <label class="label">Title</label>
+                <div class="control">
+                    <input class="input" type="text" name="title" placeholder="Enter Title" value="{{ .payload.Title }}" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Author</label>
+                <div class="control">
+                    <input class="input" type="text" name="author" placeholder="Enter Author" value="{{ .payload.Author }}" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Description</label>
+                <div class="control">
+                    <input class="input" type="text" name="description" placeholder="Enter Description" value="{{ .payload.Description }}" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Stock</label>
+                <div class="control">
+                    <input class="input" type="number" name="stock" placeholder="Enter Stock" value="{{ .payload.Stock }}" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <button type="submit" class="button is-link">
+                        {{ if .payload }}Update Book{{ else }}Add Book{{ end }}
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</section>
+
+{{ template "footer.html" . }}

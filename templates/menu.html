@@ -1,0 +1,45 @@
+{{ define "menu.html" }}
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+
+        <!-- Brand + Mobile Toggle -->
+        <div class="navbar-header">
+            <button
+                type="button"
+                class="navbar-toggle collapsed"
+                data-toggle="collapse"
+                data-target="#navbar-menu"
+                aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <a class="navbar-brand" href="/books?auth={{ .auth }}">
+                Inventory Book
+            </a>
+        </div>
+
+        <!-- Menu -->
+        <div class="collapse navbar-collapse" id="navbar-menu">
+            <ul class="nav navbar-nav">
+                <li>
+                    <a href="/books?auth={{ .auth }}">Home</a>
+                </li>
+                <li>
+                    <a href="/addBook?auth={{ .auth }}">Add Book</a>
+                </li>
+            </ul>
+
+            <!-- Right Menu -->
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/login">Logout</a>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</nav>
+{{ end }}

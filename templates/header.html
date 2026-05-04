@@ -1,0 +1,32 @@
+{{ define "header.html" }}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ if .title }}{{ .title }}{{ else }}Login{{ end }}</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            padding-top: 70px;
+        }
+
+        .container-box {
+            max-width: 900px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+
+    {{ if .title }}
+        {{ template "menu.html" . }}
+        <div class="container container-box">
+    {{ else }}
+        <div class="container text-center">
+            <h1>LOGIN</h1>
+    {{ end }}
+
+{{ end }}
