@@ -24,8 +24,7 @@ func init() {
 	app.Use(gin.Logger(), gin.Recovery())
 
 	// Load template HTML
-	app.LoadHTMLGlob("templates/*")
-
+	app.LoadHTMLGlob("./templates/*")
 	// Handler app
 	h := apps.New(conn)
 
