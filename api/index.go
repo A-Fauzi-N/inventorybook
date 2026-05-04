@@ -2,6 +2,9 @@ package handler
 
 import (
 	"net/http"
+	"os"
+	"path/filepath"
+	"runtime"
 	apps "inventorybook/app"
 	"inventorybook/auth"
 	"inventorybook/db"
@@ -15,25 +18,28 @@ var (
 )
 
 func init() {
-	// Inisialisasi database
 	conn := db.InitDB()
 	db.Migrate(conn)
 
-	// Inisialisasi router
 	app = gin.New()
 	app.Use(gin.Logger(), gin.Recovery())
 
-	// Load template HTML
-	app.LoadHTMLGlob("./templates/*")
-	// Handler app
+	_, filename, _, _ := runtime.Caller(0)
+	basePath := filepath.Dir(filepath.Dir(filename))
+	templatesPath := filepath.Join(basePath, "templates", "*")
+
+	if _, err := os.Stat(filepath.Join(basePath, "templates")); os.IsNotExist(err) {
+		templatesPath = "templates/*"
+	}
+
+	app.LoadHTMLGlob(templatesPath)
+
 	h := apps.New(conn)
 
-	// AUTH ROUTES
 	app.GET("/", auth.HomeHandler)
 	app.GET("/login", auth.LoginGetHandler)
 	app.POST("/login", auth.LoginPostHandler)
 
-	// BOOK ROUTES (Protected)
 	app.GET("/books", middleware.AuthValid, h.GetBooks)
 	app.GET("/book/:id", middleware.AuthValid, h.GetBookById)
 	app.GET("/addBook", middleware.AuthValid, h.AddBook)
@@ -43,7 +49,6 @@ func init() {
 	app.POST("/deleteBook/:id", middleware.AuthValid, h.DeleteBook)
 }
 
-// Handler is the entry point for Vercel
 func Handler(w http.ResponseWriter, r *http.Request) {
 	app.ServeHTTP(w, r)
 }

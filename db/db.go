@@ -1,18 +1,17 @@
 package db
 
 import (
-	"fmt"
 	"inventorybook/models"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
 	"strings"
 
 	_ "database/sql"
-
-	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
+	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 func addNeonEndpoint(connStr string) string {
@@ -27,7 +26,7 @@ func addNeonEndpoint(connStr string) string {
 		return connStr
 	}
 
-	endpointID := parts[0] // pakai apa adanya, termasuk -pooler
+	endpointID := parts[0]
 
 	q := u.Query()
 	if q.Get("options") == "" {
@@ -44,7 +43,6 @@ func InitDB() *gorm.DB {
 	conn := os.Getenv("POSTGRES_URL")
 	conn = addNeonEndpoint(conn)
 
-	// Ganti "postgres" -> "pgx"
 	db, err := gorm.Open("pgx", conn)
 	if err != nil {
 		log.Fatal(err)
