@@ -73,7 +73,11 @@ func (h *Handler) PostBook(c *gin.Context) {
 		return
 	}
 
-	if err := h.DB.Create(&book).Error; err != nil {
+	err := h.DB.Exec(
+		"INSERT INTO books (title, author, description, stock) VALUES ($1, $2, $3, $4)",
+		book.Title, book.Author, book.Description, book.Stock,
+	).Error
+	if err != nil {
 		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
 			"error": "Gagal menambahkan buku",
 		})
@@ -108,7 +112,6 @@ func (h *Handler) PutBook(c *gin.Context) {
 	var book models.Books
 	bookId := c.Param("id")
 
-	// Cek apakah buku ada
 	if h.DB.First(&book, "id = ?", bookId).RecordNotFound() {
 		c.HTML(http.StatusNotFound, "error.html", gin.H{
 			"error": "Book not found",
@@ -116,7 +119,6 @@ func (h *Handler) PutBook(c *gin.Context) {
 		return
 	}
 
-	// Ambil data baru dari form
 	var reqBook models.Books
 	if err := c.ShouldBind(&reqBook); err != nil {
 		c.HTML(http.StatusBadRequest, "error.html", gin.H{
@@ -125,8 +127,11 @@ func (h *Handler) PutBook(c *gin.Context) {
 		return
 	}
 
-	// Update field
-	if err := h.DB.Model(&book).Updates(reqBook).Error; err != nil {
+	err := h.DB.Exec(
+		"UPDATE books SET title=$1, author=$2, description=$3, stock=$4 WHERE id=$5",
+		reqBook.Title, reqBook.Author, reqBook.Description, reqBook.Stock, bookId,
+	).Error
+	if err != nil {
 		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
 			"error": "Gagal update buku",
 		})
@@ -149,7 +154,8 @@ func (h *Handler) DeleteBook(c *gin.Context) {
 		return
 	}
 
-	if err := h.DB.Delete(&book).Error; err != nil {
+	err := h.DB.Exec("DELETE FROM books WHERE id=$1", bookId).Error
+	if err != nil {
 		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
 			"error": "Gagal menghapus buku",
 		})
