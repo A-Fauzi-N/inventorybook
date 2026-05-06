@@ -21,7 +21,7 @@ func New(db *gorm.DB) Handler {
 func (h *Handler) GetBooks(c *gin.Context) {
 	var books []models.Books
 
-	if err := h.DB.Find(&books).Error; err != nil {
+	if err := h.DB.Raw("SELECT id, title, author, description, stock FROM books").Scan(&books).Error; err != nil {
 		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
 			"error": "Gagal mengambil data buku",
 		})
@@ -40,7 +40,7 @@ func (h *Handler) GetBookById(c *gin.Context) {
 	bookId := c.Param("id")
 	var book models.Books
 
-	if h.DB.First(&book, "id = ?", bookId).RecordNotFound() {
+	if err := h.DB.Raw("SELECT id, title, author, description, stock FROM books WHERE id=$1", bookId).Scan(&book).Error; err != nil {
 		c.HTML(http.StatusNotFound, "error.html", gin.H{
 			"error": "Book not found",
 		})
@@ -90,10 +90,10 @@ func (h *Handler) PostBook(c *gin.Context) {
 
 // GET /updateBook/:id
 func (h *Handler) UpdateBook(c *gin.Context) {
-	var book models.Books
 	bookId := c.Param("id")
+	var book models.Books
 
-	if h.DB.First(&book, "id = ?", bookId).RecordNotFound() {
+	if err := h.DB.Raw("SELECT id, title, author, description, stock FROM books WHERE id=$1", bookId).Scan(&book).Error; err != nil {
 		c.HTML(http.StatusNotFound, "error.html", gin.H{
 			"error": "Book not found",
 		})
@@ -109,15 +109,7 @@ func (h *Handler) UpdateBook(c *gin.Context) {
 
 // POST /updateBook/:id
 func (h *Handler) PutBook(c *gin.Context) {
-	var book models.Books
 	bookId := c.Param("id")
-
-	if h.DB.First(&book, "id = ?", bookId).RecordNotFound() {
-		c.HTML(http.StatusNotFound, "error.html", gin.H{
-			"error": "Book not found",
-		})
-		return
-	}
 
 	var reqBook models.Books
 	if err := c.ShouldBind(&reqBook); err != nil {
@@ -127,13 +119,20 @@ func (h *Handler) PutBook(c *gin.Context) {
 		return
 	}
 
-	err := h.DB.Exec(
+	result := h.DB.Exec(
 		"UPDATE books SET title=$1, author=$2, description=$3, stock=$4 WHERE id=$5",
 		reqBook.Title, reqBook.Author, reqBook.Description, reqBook.Stock, bookId,
-	).Error
-	if err != nil {
+	)
+	if result.Error != nil {
 		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
 			"error": "Gagal update buku",
+		})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.HTML(http.StatusNotFound, "error.html", gin.H{
+			"error": "Book not found",
 		})
 		return
 	}
@@ -144,20 +143,19 @@ func (h *Handler) PutBook(c *gin.Context) {
 
 // POST /deleteBook/:id
 func (h *Handler) DeleteBook(c *gin.Context) {
-	var book models.Books
 	bookId := c.Param("id")
 
-	if h.DB.First(&book, "id = ?", bookId).RecordNotFound() {
-		c.HTML(http.StatusNotFound, "error.html", gin.H{
-			"error": "Book not found",
+	result := h.DB.Exec("DELETE FROM books WHERE id=$1", bookId)
+	if result.Error != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
+			"error": "Gagal menghapus buku",
 		})
 		return
 	}
 
-	err := h.DB.Exec("DELETE FROM books WHERE id=$1", bookId).Error
-	if err != nil {
-		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
-			"error": "Gagal menghapus buku",
+	if result.RowsAffected == 0 {
+		c.HTML(http.StatusNotFound, "error.html", gin.H{
+			"error": "Book not found",
 		})
 		return
 	}
